@@ -11,8 +11,9 @@ public class StateAgent : MonoBehaviour {
 		Pulse = 2,
 		Start = 3,
 		Success = 4,
-		End = 5,
-		Invalid = 6,
+		EndLose = 5,
+		EndWin = 6,
+		Invalid = 7,
 	}
 
 	public struct Task
@@ -55,14 +56,16 @@ public class StateAgent : MonoBehaviour {
 	public AudioClip[] pulseClips;
 	public AudioClip[] startClips;
 	public AudioClip[] successClips;
-	public AudioClip[] endClips;
+	public AudioClip[] endLoseClips;
+	public AudioClip[] endWinClips;
 
 	public Texture2D cprImage;
 	public Texture2D precordialThumpImage;
 	public Texture2D pulseImage;
 	public Texture2D startImage;
 	public Texture2D successImage;
-	public Texture2D endImage;
+	public Texture2D endLoseImage;
+	public Texture2D endWinImage;
 
 	private GameObject imageQuad;
 
@@ -75,7 +78,8 @@ public class StateAgent : MonoBehaviour {
 
 	private Task startTask;
 	private Task successTask;
-	private Task endTask;
+	private Task endLoseTask;
+	private Task endWinTask;
 	private List<Task> possibleTasks;
 	private Task currentTask;
 
@@ -87,6 +91,7 @@ public class StateAgent : MonoBehaviour {
 	private float minimumFailTime = 1.5f;
 
 	private int score;
+	private int winScore = 2;
 	private int highScore;
 	private string highScoreString = "HighScore";
 
@@ -114,7 +119,8 @@ public class StateAgent : MonoBehaviour {
 
 		startTask = new Task( TaskType.Start, KeyCode.T, startClips, startImage, Mathf.Infinity );
 		successTask = new Task( TaskType.Success, KeyCode.None, successClips, successImage, 1f );
-		endTask = new Task( TaskType.End, KeyCode.T, endClips, endImage, Mathf.Infinity );
+		endLoseTask = new Task( TaskType.EndLose, KeyCode.T, endLoseClips, endLoseImage, Mathf.Infinity );
+		endWinTask = new Task( TaskType.EndWin, KeyCode.T, endWinClips, endWinImage, Mathf.Infinity );
 
 		possibleTasks = new List<Task>();
 
@@ -175,12 +181,12 @@ public class StateAgent : MonoBehaviour {
 			if( currentTask.task == TaskType.Success )
 				SetRandomTask();
 			else
-				SetNextTask( TaskType.End );
+				SetNextTask( TaskType.EndLose );
 		}
 
 		if( currentTime > 0.3f && Input.GetKeyDown( currentTask.button ) )
 		{
-			if( currentTask.task == TaskType.Start || currentTask.task == TaskType.End )
+			if( currentTask.task == TaskType.Start || currentTask.task == TaskType.EndLose || currentTask.task == TaskType.EndWin )
 			{
 				currentFailTimeReduce = 0f;
 				score = 0;
@@ -188,7 +194,12 @@ public class StateAgent : MonoBehaviour {
 			}
 			else
 			{
-				SetNextTask( TaskType.Success );
+				score++;
+
+				if( score == winScore )
+					SetNextTask( TaskType.EndWin );
+				else
+					SetNextTask( TaskType.Success );
 			}
 		}
 
@@ -219,10 +230,16 @@ public class StateAgent : MonoBehaviour {
 			GUI.color = new Color( 0.25f, 0.25f, 0.25f, 1f );
 		}
 
-		if( currentTask.task == TaskType.End )
+		if( currentTask.task == TaskType.EndLose )
 		{
 			text = "High Score: " + highScore + "\n\nScore: " + score + "\n\n\n\n\nThump to play!";
 			GUI.color = Color.white;
+		}
+
+		if( currentTask.task == TaskType.EndWin )
+		{
+			text = "Best Veterinarian Ever\n\nYou Win!\n\n\n\n\nThump to play!";
+			GUI.color = new Color( 0.25f, 0.25f, 0.25f, 1f );
 		}
 
 		GUI.Label( textRect, text, textStyle );
@@ -263,9 +280,7 @@ public class StateAgent : MonoBehaviour {
 				currentFailTimeReduce += failTimeReduceRate;
 
 				if( failTime - currentFailTimeReduce < minimumFailTime )
-					currentFailTimeReduce = failTime - minimumFailTime;
-
-				score++; 
+					currentFailTimeReduce = failTime - minimumFailTime; 
 
 				if( clockFace )
 					clockFace.GetComponent<Renderer>().enabled = false;
@@ -274,9 +289,9 @@ public class StateAgent : MonoBehaviour {
 					clockHand.GetComponent<Renderer>().enabled = false;
 			} break;
 
-			case TaskType.End:
+			case TaskType.EndLose:
 			{
-				currentTask = endTask; 
+				currentTask = endLoseTask; 
 				
 				if( score > highScore )
 				{
@@ -290,6 +305,23 @@ public class StateAgent : MonoBehaviour {
 				if( clockHand )
 					clockHand.GetComponent<Renderer>().enabled = false;
 			} break;
+
+		case TaskType.EndWin:
+		{
+			currentTask = endWinTask; 
+			
+			if( score > highScore )
+			{
+				highScore = score;
+				PlayerPrefs.SetInt( highScoreString, highScore );
+			}
+			
+			if( clockFace )
+				clockFace.GetComponent<Renderer>().enabled = false;
+			
+			if( clockHand )
+				clockHand.GetComponent<Renderer>().enabled = false;
+		} break;
 
 			default: return;
 		}
@@ -332,7 +364,7 @@ public class StateAgent : MonoBehaviour {
 		audioSource.loop = false;
 		audioSource.volume = 1f;
 
-		if( currentTask.task == TaskType.Start || currentTask.task == TaskType.Success || currentTask.task == TaskType.End )
+		if( currentTask.task == TaskType.Start || currentTask.task == TaskType.Success || currentTask.task == TaskType.EndLose || currentTask.task == TaskType.EndWin )
 		{
 			audioSource.pitch = 1f;
 		}
