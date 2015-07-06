@@ -91,7 +91,7 @@ public class StateAgent : MonoBehaviour {
 	private float minimumFailTime = 1.5f;
 
 	private int score;
-	private int winScore = 2;
+	private int winScore = 25;
 	private int highScore;
 	private string highScoreString = "HighScore";
 
