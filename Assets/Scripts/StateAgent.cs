@@ -89,9 +89,10 @@ public class StateAgent : MonoBehaviour {
 	private float currentFailTimeReduce;
 	private float failTimeReduceRate = 0.25f;
 	private float minimumFailTime = 1.5f;
+	private float resetTime = 25f;
 
 	private int score;
-	private int winScore = 25;
+	private int winScore = 20;
 	private int highScore;
 	private string highScoreString = "HighScore";
 
@@ -209,6 +210,17 @@ public class StateAgent : MonoBehaviour {
 
 			if( currentTime > duration * 0.5f && clockHand.transform.eulerAngles.z < 90f )
 				clockHand.transform.rotation = zeroRotation;
+		}
+
+		if( currentTask.task != TaskType.Start && ( currentTime > resetTime || Input.GetKeyDown( KeyCode.R ) ) )
+		{
+			SetNextTask( TaskType.Start );
+		}
+
+		if( Input.GetKeyDown( KeyCode.Backspace ) )
+		{
+			highScore = 0;
+			PlayerPrefs.DeleteAll();
 		}
 
 		if( Input.GetKeyDown( KeyCode.Escape ) )
@@ -338,6 +350,12 @@ public class StateAgent : MonoBehaviour {
 			randomIndex = ( randomIndex + 1 )%possibleTasks.Count;
 
 		randomTaskType = possibleTasks[ randomIndex ].task;
+
+		if( randomTaskType == TaskType.Pulse && Input.GetKey( KeyCode.P ) )
+		{
+			randomIndex = ( randomIndex + 1 )%possibleTasks.Count;
+			randomTaskType = possibleTasks[ randomIndex ].task;
+		}
 
 		SetNextTask( randomTaskType );
 	}
