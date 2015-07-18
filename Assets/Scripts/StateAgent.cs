@@ -185,7 +185,7 @@ public class StateAgent : MonoBehaviour {
 				SetNextTask( TaskType.EndLose );
 		}
 
-		if( currentTime > 0.3f && Input.GetKeyDown( currentTask.button ) )
+		if( currentTime > 0.3f && Input.GetKeyDown( currentTask.button ) && !Input.GetKey( KeyCode.Space ) )
 		{
 			if( currentTask.task == TaskType.Start || currentTask.task == TaskType.EndLose || currentTask.task == TaskType.EndWin )
 			{
@@ -212,7 +212,7 @@ public class StateAgent : MonoBehaviour {
 				clockHand.transform.rotation = zeroRotation;
 		}
 
-		if( currentTask.task != TaskType.Start && ( currentTime > resetTime || Input.GetKeyDown( KeyCode.R ) ) )
+		if( Input.GetKeyDown( KeyCode.R ) || ( ( currentTask.task == TaskType.EndWin || currentTask.task == TaskType.EndLose ) && ( currentTime > resetTime ) ) )
 		{
 			SetNextTask( TaskType.Start );
 		}
@@ -380,7 +380,15 @@ public class StateAgent : MonoBehaviour {
 
 		audioSource.clip = clip;
 		audioSource.loop = false;
-		audioSource.volume = 1f;
+
+		if( currentTask.task == TaskType.EndLose )
+		{
+			audioSource.volume = 0.15f;
+		}
+		else
+		{
+			audioSource.volume = 1f;
+		}
 
 		if( currentTask.task == TaskType.Start || currentTask.task == TaskType.Success || currentTask.task == TaskType.EndLose || currentTask.task == TaskType.EndWin )
 		{
