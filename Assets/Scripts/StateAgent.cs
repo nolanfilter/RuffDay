@@ -383,7 +383,7 @@ public class StateAgent : MonoBehaviour {
 
 		if( currentTask.task == TaskType.EndLose )
 		{
-			audioSource.volume = 0.15f;
+			audioSource.volume = 0.5f;
 		}
 		else
 		{
