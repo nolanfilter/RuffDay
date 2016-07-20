@@ -92,7 +92,7 @@ public class StateAgent : MonoBehaviour {
 	private float resetTime = 25f;
 
 	private int score;
-	private int winScore = 20;
+	public int winScore = 20;
 	private int highScore;
 	private string highScoreString = "HighScore";
 
