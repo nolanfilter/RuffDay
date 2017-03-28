@@ -96,6 +96,8 @@ public class StateAgent : MonoBehaviour {
 	private int highScore;
 	private string highScoreString = "HighScore";
 
+    private string winScoreString = "";
+
 	private TaskType randomTaskType = TaskType.Invalid;
 
 	private static StateAgent mInstance = null;
@@ -185,6 +187,22 @@ public class StateAgent : MonoBehaviour {
 				SetNextTask( TaskType.EndLose );
 		}
 
+        if( Input.GetKeyDown( KeyCode.UpArrow ) )
+        {
+            winScore++;
+
+            StopCoroutine( "DoDisplayWinScore" );
+            StartCoroutine( "DoDisplayWinScore" );
+        }
+
+        if( Input.GetKeyDown( KeyCode.DownArrow ) )
+        {
+            winScore--;
+
+            StopCoroutine( "DoDisplayWinScore" );
+            StartCoroutine( "DoDisplayWinScore" );
+        }
+
 		if( currentTime > 0.3f && Input.GetKeyDown( currentTask.button ) && !Input.GetKey( KeyCode.Space ) )
 		{
 			if( currentTask.task == TaskType.Start || currentTask.task == TaskType.EndLose || currentTask.task == TaskType.EndWin )
@@ -197,10 +215,14 @@ public class StateAgent : MonoBehaviour {
 			{
 				score++;
 
-				if( score == winScore )
-					SetNextTask( TaskType.EndWin );
-				else
-					SetNextTask( TaskType.Success );
+                if( score >= winScore )
+                {
+                    SetNextTask( TaskType.EndWin );
+                }
+                else
+                {
+                    SetNextTask( TaskType.Success );
+                }
 			}
 		}
 
@@ -255,6 +277,11 @@ public class StateAgent : MonoBehaviour {
 		}
 
 		GUI.Label( textRect, text, textStyle );
+
+        if( !string.IsNullOrEmpty( winScoreString ) )
+        {
+            GUI.Label( new Rect( 5f, 5f, 50f, 50f ), winScoreString );
+        }
 	}
 
 	private void SetNextTask( TaskType nextTaskType )
@@ -416,4 +443,13 @@ public class StateAgent : MonoBehaviour {
 		if( imageQuad )
 			imageQuad.GetComponent<Renderer>().material.mainTexture = image;
 	}
+
+    private IEnumerator DoDisplayWinScore()
+    {
+        winScoreString = "" + winScore;
+
+        yield return new WaitForSeconds( 1f );
+
+        winScoreString = "";
+    }
 }
